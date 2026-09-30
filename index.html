@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Storm in a Teacup</title>
+<meta name="description" content="A silly, tea-fuelled game of British idioms.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="sign">
+    <h1>Storm in a <span>Teacup</span></h1>
+    <p>A game of British idioms. Each right answer pours a cup of tea, and every full teapot upgrades the biscuit in your tin. Get one wrong and a teabag goes. Run out of teabags and you lose a life.</p>
+    <p class="dedication" id="dedication" hidden></p>
+  </header>
+
+  <section class="tally" aria-label="Your tea">
+    <div class="stat"><span class="lbl">Teapot</span><div class="row" id="cups"></div></div>
+    <div class="stat"><span class="lbl">Teabags</span><div class="row" id="bags"></div></div>
+    <div class="stat"><span class="lbl">Lives</span><div class="row" id="lives"></div></div>
+    <div class="stat"><span class="lbl">Cups poured</span><span class="score" id="score">0</span></div>
+    <div class="stat"><span class="lbl">Best game</span><span class="score" id="best">0</span></div>
+    <div class="stat"><span class="lbl">In the tin</span><span class="mini-tin" id="miniTin"></span></div>
+  </section>
+
+  <section class="tin" aria-labelledby="tinTitle">
+    <div class="tin-head">
+      <h2 id="tinTitle">The biscuit tin</h2>
+      <div class="actions">
+        <button class="btn sm" id="eat" disabled>Eat it now</button>
+      </div>
+    </div>
+    <div class="ladder" id="ladder"></div>
+    <p class="tin-note">Each full teapot upgrades your biscuit one rung. Eat it whenever you like to claim its perk, which empties the tin. Or hold out for something better, but if you lose a life the tin gets knocked over and your biscuit drops a rung.</p>
+    <p class="plate" id="plate"></p>
+    <p class="plate" id="honours" hidden></p>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="t-daily" data-tab="daily">Today's idiom</button>
+    <button role="tab" id="t-fill" data-tab="fill">Fill the gap</button>
+    <button role="tab" id="t-rebus" data-tab="rebus">Picture puzzles</button>
+    <button role="tab" id="t-world" data-tab="world">Around the world</button>
+    <button role="tab" id="t-mash" data-tab="mash">Mash-up</button>
+    <button role="tab" id="t-dict" data-tab="dict">The Brewtionary</button>
+    <button role="tab" id="t-quiz" data-tab="quiz">Meaning &amp; origins</button>
+    <button role="tab" id="t-lib" data-tab="lib">Library &amp; timeline</button>
+  </nav>
+
+  <main id="main"></main>
+
+  <footer>
+    <p>Over 80 idioms, each explained in our own words. Origins are flagged by how solid the evidence is, dates are approximate first appearances, and when nobody knows where a phrase came from, we say so.</p>
+    <p id="friendFooter"></p>
+  </footer>
+</div>
+
+<div class="storm" id="storm" hidden role="alertdialog" aria-modal="true" aria-labelledby="stormTitle" aria-describedby="stormMsg">
+  <div class="box">
+    <svg viewBox="0 0 240 250" aria-hidden="true">
+      <defs><clipPath id="cupInside"><path d="M52 124 H168 V150 Q168 202 110 202 Q52 202 52 150 Z"/></clipPath></defs>
+      <g class="st-cupg">
+        <ellipse class="st-saucer" cx="110" cy="212" rx="88" ry="12"/>
+        <path class="st-handle" d="M170 138 Q204 136 200 160 Q196 182 166 178"/>
+        <path class="st-cup" d="M48 120 H172 V150 Q172 206 110 206 Q48 206 48 150 Z"/>
+        <g clip-path="url(#cupInside)">
+          <g class="st-slosh"><path class="st-tea st-waves" d="M-40 132 q20 -14 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V230 H-40 Z"/></g>
+        </g>
+        <circle class="st-drop" cx="58" cy="124" r="4"/>
+        <circle class="st-drop l2" cx="66" cy="120" r="3"/>
+        <circle class="st-drop r" cx="160" cy="122" r="4"/>
+        <path class="st-heart" d="M110 118 c-6 -10 -22 -8 -22 4 c0 10 14 18 22 25 c8 -7 22 -15 22 -25 c0 -12 -16 -14 -22 -4 z"/>
+      </g>
+      <g class="st-rain"><line x1="80" y1="66" x2="76" y2="78"/><line x1="100" y1="68" x2="96" y2="80"/><line x1="122" y1="66" x2="118" y2="78"/><line x1="142" y1="68" x2="138" y2="80"/><line x1="160" y1="64" x2="156" y2="76"/></g>
+      <polygon class="st-bolt" points="118,58 100,92 114,92 102,124 136,82 120,82 132,58"/>
+      <g class="st-cloudg">
+        <circle class="st-cloud-dark" cx="90" cy="46" r="20"/><circle class="st-cloud" cx="116" cy="36" r="26"/>
+        <circle class="st-cloud-dark" cx="146" cy="46" r="20"/><rect class="st-cloud" x="78" y="44" width="82" height="22" rx="11"/>
+      </g>
+    </svg>
+    <h2 id="stormTitle">A storm in a teacup!</h2>
+    <p id="stormMsg"></p>
+    <button class="btn" id="stormOk">Carry on</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="over" id="over" hidden>
+  <div class="box">
+    <h2>The pot's gone cold</h2>
+    <p id="overMsg"></p>
+    <p id="overBest" class="verdict ok"></p>
+    <button class="btn" id="restart">Put the kettle on again</button>
+  </div>
+</div>
+
+<script src="idioms.js"></script>
+<script src="friend.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

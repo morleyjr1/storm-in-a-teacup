@@ -206,3 +206,9 @@ footer { font-size: .8rem; color: var(--muted); max-width: 65ch; }
 /* Site additions */
 .chip.house { color: var(--accent); }
 .dedication { margin: 10px 0 0; font-style: italic; color: var(--accent); font-size: .95rem; max-width: 62ch; }
+
+.map { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(58px, auto)); gap: 6px; max-width: 520px; margin-inline: auto; }
+.tile { border: 2px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 10px; padding: 6px; cursor: pointer; display: grid; align-content: center; justify-items: center; gap: 2px; text-align: center; font: 500 .72rem var(--body); min-width: 0; }
+.tile b { font-size: .82rem; line-height: 1.2; }
+.tile:hover { border-color: var(--ink); }
+.tile.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }

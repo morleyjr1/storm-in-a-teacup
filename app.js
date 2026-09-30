@@ -132,7 +132,7 @@ function revealBlock(i, verdict, ok){
     ${verdict ? `<p class="verdict ${ok ? "ok" : "no"}">${verdict}</p>` : ""}
     <p><b>${phrase(i)}</b>: ${i.meaning}</p>
     <p>${i.origin}</p>
-    <div class="meta"><span class="chip ${i.status}">${STATUS[i.status]}</span><span>${i.date}</span></div>
+    <div class="meta"><span class="chip ${i.status}">${STATUS[i.status]}</span><span>${i.date}</span>${i.region ? `<span>· ${i.region}</span>` : ""}</div>
   </div>`;
 }
 const nextBtn = (id, label) => `<div class="actions" style="margin-top:14px"><button class="btn" id="${id}">${label}</button></div>`;
@@ -336,26 +336,28 @@ function library(){
       <div class="seg" role="group" aria-label="View">
         <button id="modeAz" aria-pressed="${libMode === "az"}">A–Z</button>
         <button id="modeTl" aria-pressed="${libMode === "tl"}">Timeline</button>
+        <button id="modeMap" aria-pressed="${libMode === "map"}">Map</button>
       </div>
     </div>
     <div id="libBody"></div>
   </section>`;
   $("modeAz").onclick = () => { libMode = "az"; library(); };
   $("modeTl").onclick = () => { libMode = "tl"; library(); };
-  libMode === "az" ? libAZ() : libTimeline();
+  $("modeMap").onclick = () => { libMode = "map"; library(); };
+  libMode === "az" ? libAZ() : libMode === "tl" ? libTimeline() : libMap();
 }
 function libAZ(){
   $("libBody").innerHTML = `<div style="display:grid;gap:12px"><input type="search" id="libSearch" placeholder="Search idioms, meanings or origins" aria-label="Search idioms"><div class="lib" id="libList"></div></div>`;
   const draw = f => {
     const key = x => phrase(x).replace(/^[^a-z]+/i, "");
-    const list = IDIOMS.filter(i => (phrase(i) + i.meaning + i.origin).toLowerCase().includes(f.toLowerCase())).slice().sort((x, y) => key(x).localeCompare(key(y)));
+    const list = IDIOMS.filter(i => (phrase(i) + i.meaning + i.origin + (i.region || "")).toLowerCase().includes(f.toLowerCase())).slice().sort((x, y) => key(x).localeCompare(key(y)));
     $("libList").innerHTML = list.length ? list.map(i => `<article class="card">
       <h3>${phrase(i)}</h3>
       <p class="mean">${i.meaning}</p>
       <p>${i.origin}</p>
       ${i.story ? `<p class="myth"><b>Popular myth:</b> ${i.story}</p>` : ""}
       ${i.world ? `<p class="abroad"><b>Elsewhere:</b> ${i.world.map(w => `${w[0]} “${w[1]}”${w[2] ? ` (${w[2]})` : ""}`).join("; ")}</p>` : ""}
-      <div class="meta"><span class="chip ${i.status}">${STATUS[i.status]}</span><span>${i.date}</span></div>
+      <div class="meta"><span class="chip ${i.status}">${STATUS[i.status]}</span><span>${i.date}</span>${i.region ? `<span>· ${i.region}</span>` : ""}</div>
     </article>`).join("") : `<p class="hint">No idioms match that search.</p>`;
   };
   $("libSearch").oninput = e => draw(e.target.value);
@@ -415,6 +417,49 @@ function show(tab){
   VIEWS[tab]();
 }
 document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => show(b.dataset.tab));
+
+/* ---- Regions ---- */
+const REGIONS = [
+  { name:"Scotland", area:"1 / 2 / 3 / 5" },
+  { name:"Northern Ireland", area:"3 / 1 / 4 / 2" },
+  { name:"North East", area:"3 / 4 / 4 / 5" },
+  { name:"Liverpool", area:"4 / 2 / 5 / 3" },
+  { name:"Northern England", area:"3 / 3 / 5 / 4" },
+  { name:"Yorkshire", area:"4 / 4 / 5 / 5" },
+  { name:"Wales", area:"5 / 2 / 6 / 3" },
+  { name:"East Midlands", area:"5 / 3 / 6 / 5" },
+  { name:"West Country", area:"6 / 1 / 7 / 3" },
+  { name:"London (Cockney)", area:"6 / 3 / 7 / 5" }
+];
+let mapPick = null;
+function libMap(){
+  const count = r => IDIOMS.filter(i => i.region === r).length;
+  $("libBody").innerHTML = `<p class="hint" style="margin-bottom:10px">A rough map, not to scale. Tap a region to see its sayings. Idioms without a region are used all over Britain.</p>
+    <div class="map">${REGIONS.map(r => `<button class="tile ${mapPick === r.name ? "on" : ""}" style="grid-area:${r.area}" data-r="${r.name}"><b>${r.name}</b><span>${count(r.name)} saying${count(r.name) === 1 ? "" : "s"}</span></button>`).join("")}</div>
+    <div class="lib" id="mapList" style="margin-top:14px"></div>`;
+  document.querySelectorAll(".tile").forEach(t => t.onclick = () => { mapPick = t.dataset.r; libMap(); });
+  if (mapPick) $("mapList").innerHTML = `<h3 class="kicker" style="margin:0">${mapPick}</h3>` + IDIOMS.filter(i => i.region === mapPick).map(i => `<article class="card">
+      <h3>${phrase(i)}</h3><p class="mean">${i.meaning}</p><p>${i.origin}</p>
+      <div class="meta"><span class="chip ${i.status}">${STATUS[i.status]}</span><span>${i.date}</span></div></article>`).join("");
+}
+let lastRegion;
+function regionGame(){
+  const pool = IDIOMS.filter(i => i.region);
+  const i = pick(pool, lastRegion); lastRegion = i;
+  const others = shuffle(REGIONS.map(r => r.name).filter(n => n !== i.region)).slice(0, 3);
+  const opts = shuffle([[i.region, true], ...others.map(n => [n, false])]);
+  $("main").innerHTML = `<section class="panel">
+    <p class="kicker">Where in the UK would you hear this?</p>
+    <h2 class="prompt">“${phrase(i)}”</h2>
+    ${optsHtml(opts)}<div id="out"></div></section>`;
+  wireOpts(opts, ok => {
+    $("out").innerHTML = revealBlock(i, ok ? "Spot on, you've clearly been about." : `It's from ${i.region}.`, ok) + nextBtn("nx", "Next saying");
+    $("nx").onclick = regionGame; $("nx").focus();
+    ok ? award(1) : penalty();
+  });
+}
+VIEWS.region = regionGame;
+
 applyFriend();
 renderTally();
 show(location.hash && VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : "daily");

@@ -23,7 +23,7 @@ It is a plain static site with no build step. Open `index.html` in a browser to 
 ## Editing
 
 - **Personal touches:** fill in `friend.js`. Every field is optional.
-- **Adding an idiom:** copy an entry in `idioms.js` and change it. `pre`, `word` and `post` make up the phrase; `word` is the gap players fill. `status` is `attested`, `likely` or `unknown`, depending on how solid the origin evidence is.
+- **Adding an idiom:** copy an entry in `idioms.js` and change it. `pre`, `word` and `post` make up the phrase; `word` is the gap players fill. `status` is `attested`, `likely` or `unknown`, depending on how solid the origin evidence is. Add `region` (for example `region:"Wales"`) to put it on the map and in the "Where's it from?" game; the region names are listed near the bottom of `app.js`.
 
 ## About the content
 
